@@ -20,6 +20,12 @@ dist-ssr
 # Model files
 qwen/
 
+# Temp / debug files
+token.txt
+verify_result.txt
+vcheck_output.txt
+_check.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
