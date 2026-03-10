@@ -140,13 +140,15 @@ interface AlertState {
 
 export const useAlertStore = create<AlertState>((set) => ({
   alerts: [],
-  push: (alert) =>
+  push: (alert) => {
+    const id = Date.now().toString()
     set((state) => ({
-      alerts: [
-        ...state.alerts,
-        { ...alert, id: Date.now().toString() },
-      ].slice(-5),
-    })),
+      alerts: [...state.alerts, { ...alert, id }].slice(-5),
+    }))
+    setTimeout(() => {
+      set((state) => ({ alerts: state.alerts.filter((a) => a.id !== id) }))
+    }, 2000)
+  },
   dismiss: (id) =>
     set((state) => ({ alerts: state.alerts.filter((a) => a.id !== id) })),
 }))
