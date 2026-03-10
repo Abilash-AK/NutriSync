@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: nutrisync
+    name: nutrisync-backend
     runtime: node
-    buildCommand: npm install && npm run build:all
-    startCommand: npm run start
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm run start
     envVars:
       - key: NODE_ENV
         value: production
@@ -16,4 +16,6 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: GEMINI_API_KEY
+        sync: false
+      - key: GROK_API_KEY
         sync: false

@@ -23,7 +23,7 @@ const app = express();
 
 // Middleware
 const allowedOrigins = process.env.NODE_ENV === "production"
-  ? [process.env.RENDER_EXTERNAL_URL, process.env.FRONTEND_URL].filter(Boolean) as string[]
+  ? [process.env.RENDER_EXTERNAL_URL, process.env.FRONTEND_URL, /\.pages\.dev$/].filter(Boolean) as (string | RegExp)[]
   : [/^http:\/\/localhost(:\d+)?$/];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
