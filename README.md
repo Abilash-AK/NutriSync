@@ -1,6 +1,50 @@
-# NutriSync — Clinical Nutrition AI Platform
+<div align="center">
 
-> AI-powered hospital nutrition management system that automates meal planning, tracks patient dietary compliance, and optimizes kitchen production workflows.
+# 🥗 NutriSync
+
+### Clinical Nutrition AI Platform
+
+**AI-powered hospital nutrition management — automates meal planning, tracks patient dietary compliance, and optimizes kitchen production.**
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-nutrisync--2ta.pages.dev-4ade80?style=for-the-badge&logo=cloudflare&logoColor=white)](https://nutrisync-2ta.pages.dev)
+[![Backend](https://img.shields.io/badge/API-Render-46e3b7?style=for-the-badge&logo=render&logoColor=white)](https://nutrisync-ff4d.onrender.com/api/health)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Live Demo](#live-demo)
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Application Pages](#application-pages)
+- [API Endpoints](#api-endpoints)
+- [Database Schema](#database-schema)
+- [State Management](#state-management-zustand)
+- [User Roles](#user-roles)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Deployment](#deployment)
+
+---
+
+## Live Demo
+
+| Service | URL |
+|---------|-----|
+| **Frontend** | [nutrisync-2ta.pages.dev](https://nutrisync-2ta.pages.dev) |
+| **Backend API** | [nutrisync-ff4d.onrender.com](https://nutrisync-ff4d.onrender.com/api/health) |
+
+### Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@nutrisync.com | Admin@123 |
+| Doctor | doctor@nutrisync.com | Doctor@123 |
+| Kitchen Staff | kitchen@nutrisync.com | Kitchen@123 |
 
 ---
 
@@ -13,6 +57,7 @@
 | **Database** | Cloudflare D1 (SQLite via REST API) |
 | **AI** | Google Gemini 1.5 Flash |
 | **Auth** | JWT (7-day expiry), bcryptjs password hashing |
+| **Deployment** | Cloudflare Pages (frontend) + Render (backend) |
 
 ---
 
@@ -315,57 +360,118 @@ Additional sidebar elements:
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- Cloudflare account with D1 database
-- Google Gemini API key (optional — falls back to template plans)
 
-### Environment Variables
+- Node.js 18+
+- Cloudflare account with D1 database created
+- Google Gemini API key *(optional — falls back to template-based plans)*
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/your-username/nutrisync.git
+cd nutrisync
+
+# Install frontend dependencies
+npm install
+
+# Install backend dependencies
+cd backend && npm install
+```
+
+### 2. Configure Environment
 
 Create `backend/.env`:
 
 ```env
 PORT=5000
+NODE_ENV=development
+
+# Cloudflare D1
 CF_ACCOUNT_ID=your_cloudflare_account_id
 CF_D1_DATABASE_ID=your_d1_database_id
+CF_API_TOKEN=your_cloudflare_api_token
+
+# Auth
 JWT_SECRET=your_jwt_secret
+
+# AI (optional)
 GEMINI_API_KEY=your_gemini_api_key
-NODE_ENV=development
+GROK_API_KEY=your_grok_api_key
 ```
 
-### Installation
+### 3. Initialize Database
 
 ```bash
-# Install frontend dependencies
-npm install
-
-# Install backend dependencies
 cd backend
-npm install
+
+# Run migrations (creates tables in D1)
+npx ts-node --transpile-only src/scripts/migrate.ts
+
+# Seed default users and sample data
+npx ts-node --transpile-only src/scripts/seed.ts
 ```
 
-### Running the Application
+### 4. Run the Application
 
 ```bash
-# Start backend (from backend/ directory)
-cd backend
-npx ts-node-dev --respawn --transpile-only src/server.ts
-
-# Start frontend (from root directory)
-npx vite --port 5173
+# From the repo root — starts both servers
+npm run dev
 ```
 
-Or use the VS Code compound task **"NutriSync: Start All"** to launch both servers simultaneously.
+Or run them separately:
 
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:5000
+```bash
+# Terminal 1 — Backend (port 5000)
+cd backend && npm run dev
 
-### Default Login Credentials
+# Terminal 2 — Frontend (port 5173)
+npm run dev
+```
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@nutrisync.com | Admin@123 |
-| Doctor | doctor@nutrisync.com | Doctor@123 |
-| Kitchen | kitchen@nutrisync.com | Kitchen@123 |
+VS Code users: use the **"NutriSync: Start All"** compound task (`Ctrl+Shift+B`) to launch both in parallel.
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:5000 |
+
+---
+
+## Deployment
+
+### Frontend — Cloudflare Pages
+
+```bash
+# Build
+npm run build
+
+# Deploy via Wrangler
+npx wrangler pages deploy dist --project-name nutrisync
+```
+
+Set the following **secret** on the Pages project:
+
+| Secret | Value |
+|--------|-------|
+| `BACKEND_URL` | Your Render backend URL, e.g. `https://your-app.onrender.com` |
+
+### Backend — Render
+
+The `render.yaml` at the repo root configures the Render service automatically.
+
+Push to the connected branch to trigger a deploy, or manually via the Render dashboard.
+
+Required **environment variables** on Render:
+
+| Variable | Description |
+|----------|-------------|
+| `NODE_ENV` | `production` |
+| `CF_ACCOUNT_ID` | Cloudflare account ID |
+| `CF_D1_DATABASE_ID` | D1 database ID |
+| `CF_API_TOKEN` | Cloudflare API token with D1 Edit permission |
+| `JWT_SECRET` | Secret for signing JWTs |
+| `GEMINI_API_KEY` | Google Gemini API key |
+| `FRONTEND_URL` | CF Pages URL for CORS (e.g. `https://nutrisync-2ta.pages.dev`) |
 
 ---
 
