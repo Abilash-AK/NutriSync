@@ -2,7 +2,6 @@ import "express-async-errors";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
 
 // Routes
 import patientRoutes from "./routes/patients";
@@ -59,13 +58,6 @@ app.use(
     res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 );
-
-// Serve frontend static files in production
-const clientDir = path.join(__dirname, "../../dist");
-app.use(express.static(clientDir));
-app.get(/^(?!\/api).*/, (_req, res) => {
-  res.sendFile(path.join(clientDir, "index.html"));
-});
 
 const PORT = process.env.PORT || 5000;
 
