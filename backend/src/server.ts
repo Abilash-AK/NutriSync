@@ -2,7 +2,7 @@ import "express-async-errors";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
+import path from "path";
 
 // Routes
 import patientRoutes from "./routes/patients";
@@ -22,7 +22,10 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({ origin: /^http:\/\/localhost(:\d+)?$/, credentials: true }));
+const allowedOrigins = process.env.NODE_ENV === "production"
+  ? [process.env.RENDER_EXTERNAL_URL, process.env.FRONTEND_URL].filter(Boolean) as string[]
+  : [/^http:\/\/localhost(:\d+)?$/];
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 // API Routes
@@ -56,6 +59,13 @@ app.use(
     res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 );
+
+// Serve frontend static files in production
+const clientDir = path.join(__dirname, "../../dist");
+app.use(express.static(clientDir));
+app.get(/^(?!\/api).*/, (_req, res) => {
+  res.sendFile(path.join(clientDir, "index.html"));
+});
 
 const PORT = process.env.PORT || 5000;
 
