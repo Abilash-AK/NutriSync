@@ -1,3 +1,4 @@
+/// <reference types="@cloudflare/workers-types" />
 // Cloudflare Pages Function — proxies /api/* to the backend on Render
 interface Env {
   BACKEND_URL: string;
