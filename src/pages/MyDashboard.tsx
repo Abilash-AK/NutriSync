@@ -16,6 +16,7 @@ import {
   Loader2, AlertCircle, Heart, Droplets, Wheat, Beef,
   CheckCircle2, XCircle, Minus,
 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface NextMealResponse {
@@ -150,7 +151,7 @@ export default function MyDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
         <span className="ml-3 text-gray-500">Loading your dashboard…</span>
       </div>
     )
@@ -162,7 +163,7 @@ export default function MyDashboard() {
         <AlertCircle className="w-12 h-12 text-red-400 mb-3" />
         <h2 className="text-lg font-semibold text-gray-700">Unable to load dashboard</h2>
         <p className="text-sm text-gray-500 mt-1">{error ?? "No patient profile linked to your account."}</p>
-        <button onClick={loadData} className="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm hover:bg-teal-600 transition">
+        <button onClick={loadData} className="mt-4 px-4 py-2 bg-violet-500 text-white rounded-lg text-sm hover:bg-violet-600 transition">
           Retry
         </button>
       </div>
@@ -193,7 +194,12 @@ export default function MyDashboard() {
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
             Welcome, {profile.name.split(" ")[0]}
@@ -205,21 +211,26 @@ export default function MyDashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => setChatOpen(!chatOpen)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 text-teal-700 text-sm font-medium hover:bg-teal-100 transition"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-violet-50 text-violet-700 text-sm font-medium hover:bg-violet-100 transition"
           >
             <MessageCircle className="w-4 h-4" />
             Chat with AI
           </button>
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT: Next Meal + Today's Plan ── */}
         <div className="lg:col-span-2 space-y-6">
           {/* Next Meal Card */}
           {meal ? (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="bg-linear-to-r from-teal-500 to-emerald-500 px-6 py-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.45 }}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="bg-linear-to-r from-violet-500 to-indigo-500 px-6 py-4">
                 <div className="flex items-center gap-2 text-white/80 text-sm mb-1">
                   <Clock className="w-4 h-4" />
                   Next Meal — <span className="capitalize font-medium text-white">{meal.type}</span>
@@ -263,20 +274,29 @@ export default function MyDashboard() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-8 text-center"
+            >
               <UtensilsCrossed className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <h2 className="text-lg font-semibold text-gray-600">No meal plan assigned yet</h2>
               <p className="text-sm text-gray-400 mt-1">Your doctor will generate a meal plan for you soon.</p>
-            </div>
+            </motion.div>
           )}
 
           {/* Today's full plan */}
           {dayPlan && dayPlan.meals.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.45 }}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6"
+            >
               <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <UtensilsCrossed className="w-5 h-5 text-teal-500" />
+                <UtensilsCrossed className="w-5 h-5 text-violet-500" />
                 Today's Meals — Day {dayPlan.day}
               </h3>
               <div className="space-y-3">
@@ -292,7 +312,7 @@ export default function MyDashboard() {
                     <div
                       key={idx}
                       className={`p-3 rounded-xl border transition ${
-                        m.name === meal?.name ? "border-teal-200 bg-teal-50" : "border-gray-100 hover:border-gray-200"
+                        m.name === meal?.name ? "border-violet-200 bg-violet-50" : "border-gray-100 hover:border-gray-200"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -304,7 +324,7 @@ export default function MyDashboard() {
                           {m.type[0].toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium truncate ${m.name === meal?.name ? "text-teal-700" : "text-gray-700"}`}>
+                          <p className={`text-sm font-medium truncate ${m.name === meal?.name ? "text-violet-700" : "text-gray-700"}`}>
                             {m.name}
                           </p>
                           <p className="text-xs text-gray-400 capitalize">{m.type} · {m.portionSize}</p>
@@ -345,11 +365,16 @@ export default function MyDashboard() {
                   )
                 })}
               </div>
-            </div>
+            </motion.div>
           )}
 
           {/* Suggestion box */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.45 }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-6"
+          >
             <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-amber-500" />
               Submit a Food Suggestion
@@ -359,7 +384,7 @@ export default function MyDashboard() {
                 value={suggestion}
                 onChange={(e) => setSuggestion(e.target.value)}
                 placeholder="e.g. I'd prefer more South Indian dishes…"
-                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
                 onKeyDown={(e) => e.key === "Enter" && sendSuggestion()}
               />
               <button
@@ -370,16 +395,21 @@ export default function MyDashboard() {
                 {suggestionSending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send"}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* ── RIGHT: Profile + Nutrition targets + Chat ── */}
         <div className="space-y-6">
           {/* Profile card */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-5"
+          >
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-full bg-teal-100 flex items-center justify-center">
-                <User className="w-6 h-6 text-teal-600" />
+              <div className="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center">
+                <User className="w-6 h-6 text-violet-600" />
               </div>
               <div>
                 <p className="font-semibold text-gray-900">{profile.name}</p>
@@ -396,16 +426,21 @@ export default function MyDashboard() {
                 <InfoRow label="Allergies" value={profile.allergies.join(", ")} />
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Nutrition targets */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm p-5"
+          >
             <h3 className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2">
               <Heart className="w-4 h-4 text-red-400" />
               {hasTracking ? "Today's Intake vs Target" : "Daily Nutrition Targets"}
             </h3>
             {hasTracking && (
-              <p className="text-xs text-teal-600 mb-3">Based on meals you recorded today</p>
+              <p className="text-xs text-violet-600 mb-3">Based on meals you recorded today</p>
             )}
             {!hasTracking && (
               <p className="text-xs text-gray-400 mb-3">Mark meals above to track your actual intake</p>
@@ -417,13 +452,20 @@ export default function MyDashboard() {
               <NutritionBar label="Fat"      current={consumed.fat}      target={targets.fat}      unit="g"    color="bg-blue-400" />
               <NutritionBar label="Fiber"    current={0}                 target={targets.fiber}    unit="g"    color="bg-green-400" />
             </div>
-          </div>
+          </motion.div>
 
           {/* Chat panel */}
+          <AnimatePresence>
           {chatOpen && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col" style={{ height: 400 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm flex flex-col" style={{ height: 400 }}
+            >
               <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
-                <Bot className="w-4 h-4 text-teal-500" />
+                <Bot className="w-4 h-4 text-violet-500" />
                 <span className="text-sm font-semibold text-gray-700">AI Diet Assistant</span>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -434,7 +476,7 @@ export default function MyDashboard() {
                   <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
                       m.role === "user"
-                        ? "bg-teal-500 text-white"
+                        ? "bg-violet-500 text-white"
                         : "bg-gray-100 text-gray-700"
                     }`}>
                       {m.content}
@@ -455,14 +497,15 @@ export default function MyDashboard() {
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendChat()}
                   placeholder="Type a message…"
-                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
                 />
-                <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} className="p-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 disabled:opacity-50 transition">
+                <button onClick={sendChat} disabled={chatLoading || !chatInput.trim()} className="p-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 disabled:opacity-50 transition">
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

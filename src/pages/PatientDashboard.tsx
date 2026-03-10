@@ -10,6 +10,7 @@ import {
   CheckCircle2, XCircle, Clock, Minus, Flame, Beef, Wheat, Droplets,
   Send, Bot, User, Lightbulb, LogOut, UserCheck, AlertTriangle,
 } from "lucide-react"
+import { motion } from "framer-motion"
 
 type MealStatusAction = "eaten" | "partial" | "refused"
 
@@ -80,16 +81,16 @@ function MealCard({
   }
 
   return (
-    <Card className="border-gray-200 bg-white shadow-sm">
+    <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 card-hover">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium capitalize mb-1 inline-block",
+            <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize mb-1.5 inline-block",
               TYPE_COLORS[meal.type] ?? "bg-gray-100 text-gray-600")}>
               {meal.type}
             </span>
             <p className="font-semibold text-gray-900">{meal.name}</p>
-            <p className="text-xs text-gray-500">{meal.portionSize}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{meal.portionSize}</p>
           </div>
           <div className={cn("flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium", cfg.bg, cfg.color)}>
             <cfg.icon size={12} />
@@ -183,12 +184,15 @@ function ChatPanel({ patient }: { patient: Patient }) {
     <Card className="border-gray-200 bg-white shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm text-gray-900 flex items-center gap-2">
-          <Bot size={16} className="text-teal-600" /> AI Dietary Assistant
+          <div className="flex size-7 items-center justify-center rounded-lg bg-violet-100">
+            <Bot size={14} className="text-violet-600" />
+          </div>
+          AI Dietary Assistant
         </CardTitle>
-        <p className="text-xs text-gray-500">Ask if you can eat specific foods — the AI checks your conditions and suggests alternatives</p>
+        <p className="text-xs text-gray-400">Ask if you can eat specific foods — the AI checks your conditions and suggests alternatives</p>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="h-64 overflow-y-auto rounded-lg border border-gray-100 bg-gray-50 p-3 space-y-2">
+        <div className="h-64 overflow-y-auto rounded-xl border border-gray-100 bg-gray-50/50 p-3 space-y-2">
           {messages.length === 0 && (
             <div className="text-center text-gray-400 text-xs py-8">
               Ask something like &quot;Can I eat chocolate cake?&quot; or &quot;Is white rice okay for me?&quot;
@@ -197,14 +201,14 @@ function ChatPanel({ patient }: { patient: Patient }) {
           {messages.map((m) => (
             <div key={m.id} className={cn("flex gap-2", m.role === "user" ? "justify-end" : "justify-start")}>
               {m.role === "assistant" && (
-                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700 mt-0.5">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 mt-0.5">
                   <Bot size={12} />
                 </div>
               )}
               <div className={cn(
                 "max-w-[80%] rounded-xl px-3 py-2 text-sm whitespace-pre-wrap",
                 m.role === "user"
-                  ? "bg-teal-600 text-white rounded-br-sm"
+                  ? "bg-violet-600 text-white rounded-br-sm"
                   : "bg-white border border-gray-200 text-gray-700 rounded-bl-sm"
               )}>
                 {m.content}
@@ -218,7 +222,7 @@ function ChatPanel({ patient }: { patient: Patient }) {
           ))}
           {isLoading && (
             <div className="flex gap-2">
-              <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-700">
+              <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700">
                 <Bot size={12} />
               </div>
               <div className="rounded-xl bg-white border border-gray-200 px-3 py-2 text-sm text-gray-400 animate-pulse">
@@ -238,7 +242,7 @@ function ChatPanel({ patient }: { patient: Patient }) {
             onKeyDown={(e) => e.key === "Enter" && send()}
           />
           <Button size="sm" onClick={send} disabled={isLoading || !input.trim()}
-            className="bg-teal-600 hover:bg-teal-700 gap-1">
+            className="bg-violet-600 hover:bg-violet-700 gap-1">
             <Send size={14} /> Send
           </Button>
         </div>
@@ -288,9 +292,12 @@ function SuggestionBox({ patient }: { patient: Patient }) {
     <Card className="border-gray-200 bg-white shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm text-gray-900 flex items-center gap-2">
-          <Lightbulb size={16} className="text-amber-500" /> Suggestions to Kitchen
+          <div className="flex size-7 items-center justify-center rounded-lg bg-amber-100">
+            <Lightbulb size={14} className="text-amber-600" />
+          </div>
+          Suggestions to Kitchen
         </CardTitle>
-        <p className="text-xs text-gray-500">Send food preferences or requests to the kitchen staff</p>
+        <p className="text-xs text-gray-400">Send food preferences or requests to the kitchen staff</p>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex gap-2">
@@ -319,7 +326,7 @@ function SuggestionBox({ patient }: { patient: Patient }) {
                   </span>
                 </div>
                 {s.response && (
-                  <p className="text-xs text-teal-700 bg-teal-50 rounded-lg p-2 border border-teal-100">
+                  <p className="text-xs text-violet-700 bg-violet-50 rounded-lg p-2 border border-violet-100">
                     <strong>Kitchen reply:</strong> {s.response}
                   </p>
                 )}
@@ -413,13 +420,22 @@ export default function PatientDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <h1 className="text-2xl font-bold text-gray-900">Patient Dashboard</h1>
         <p className="text-sm text-gray-500">Daily meal tracking & nutrition progress</p>
-      </div>
+      </motion.div>
 
       {/* Patient selector */}
-      <Card className="border-gray-200 bg-white shadow-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+      >
+      <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center gap-3">
             <Label className="text-gray-600 text-xs shrink-0">Filter</Label>
@@ -431,7 +447,7 @@ export default function PatientDashboard() {
                   className={cn(
                     "px-3 py-1 rounded-full text-xs font-medium border transition capitalize",
                     patientTypeFilter === f
-                      ? f === "inpatient" ? "bg-teal-500 text-white border-teal-500"
+                      ? f === "inpatient" ? "bg-violet-500 text-white border-violet-500"
                         : f === "outpatient" ? "bg-gray-500 text-white border-gray-500"
                         : "bg-blue-500 text-white border-blue-500"
                       : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
@@ -463,6 +479,7 @@ export default function PatientDashboard() {
           </div>
         </CardContent>
       </Card>
+      </motion.div>
 
       {selectedPatient && (
         <>
@@ -471,16 +488,16 @@ export default function PatientDashboard() {
             "flex items-center justify-between gap-3 rounded-xl border px-4 py-3",
             isOutpatient
               ? "bg-gray-50 border-gray-200 text-gray-600"
-              : "bg-teal-50 border-teal-200 text-teal-800"
+              : "bg-violet-50 border-violet-200 text-violet-800"
           )}>
             <div className="flex items-center gap-2">
               {isOutpatient
                 ? <LogOut size={16} className="text-gray-500" />
-                : <UserCheck size={16} className="text-teal-600" />}
+                : <UserCheck size={16} className="text-violet-600" />}
               <div>
                 <span className={cn(
                   "font-semibold text-sm",
-                  isOutpatient ? "text-gray-700" : "text-teal-700"
+                  isOutpatient ? "text-gray-700" : "text-violet-700"
                 )}>
                   {isOutpatient ? "Outpatient (Discharged)" : "Inpatient"}
                 </span>
@@ -490,7 +507,7 @@ export default function PatientDashboard() {
                   </span>
                 )}
                 {!isOutpatient && selectedPatient.roomNumber && (
-                  <span className="ml-2 text-xs text-teal-500">
+                  <span className="ml-2 text-xs text-violet-500">
                     Room {selectedPatient.roomNumber} · {selectedPatient.ward}
                   </span>
                 )}
@@ -503,7 +520,7 @@ export default function PatientDashboard() {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition disabled:opacity-50",
                   isOutpatient
-                    ? "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100"
+                    ? "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100"
                     : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
                 )}
               >
@@ -538,19 +555,26 @@ export default function PatientDashboard() {
               { label: "Calorie Target", value: `${target} kcal`, icon: Flame, color: "bg-orange-500" },
               { label: "Protein", value: `${selectedPatient.nutritionTargets.protein}g`, icon: Beef, color: "bg-blue-500" },
               { label: "Carbs", value: `${selectedPatient.nutritionTargets.carbs}g`, icon: Wheat, color: "bg-yellow-500" },
-              { label: "BMI", value: `${selectedPatient.bmi} (${selectedPatient.bmiCategory})`, icon: Droplets, color: "bg-teal-600" },
-            ].map((s) => (
-              <Card key={s.label} className="border-gray-200 bg-white shadow-sm">
-                <CardContent className="flex items-center gap-3 p-3">
-                  <div className={cn("flex size-9 items-center justify-center rounded-xl", s.color)}>
-                    <s.icon size={16} className="text-white" />
+              { label: "BMI", value: `${selectedPatient.bmi} (${selectedPatient.bmiCategory})`, icon: Droplets, color: "bg-violet-600" },
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
+              >
+              <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group card-hover">
+                <CardContent className="flex items-center gap-3 p-4">
+                  <div className={cn("flex size-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3", s.color)}>
+                    <s.icon size={17} className="text-white" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">{s.label}</p>
+                    <p className="text-[11px] font-medium text-gray-500 uppercase tracking-wide">{s.label}</p>
                     <p className="font-bold text-gray-900 text-sm">{s.value}</p>
                   </div>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
           </div>
 
@@ -591,6 +615,12 @@ export default function PatientDashboard() {
               </h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 {todayPlan.meals.map((meal, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 + i * 0.06, duration: 0.35 }}
+                  >
                   <MealCard
                     key={i}
                     meal={meal}
@@ -599,6 +629,7 @@ export default function PatientDashboard() {
                     date={new Date().toISOString().split("T")[0]}
                     onUpdate={() => setTrackingRefresh((x) => x + 1)}
                   />
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -607,10 +638,15 @@ export default function PatientDashboard() {
           )}
 
           {/* AI Chatbot & Suggestions */}
-          <div className="grid gap-4 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.45 }}
+            className="grid gap-4 lg:grid-cols-2"
+          >
             <ChatPanel patient={selectedPatient} />
             <SuggestionBox patient={selectedPatient} />
-          </div>
+          </motion.div>
         </>
       )}
     </div>

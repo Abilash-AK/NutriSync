@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS patients (
   nutrition_targets     TEXT NOT NULL DEFAULT '{}',  -- JSON object
   admission_date        TEXT NOT NULL,
   discharge_date        TEXT,
+  phone                 TEXT,
   is_active             INTEGER NOT NULL DEFAULT 1,
   doctor_id             TEXT NOT NULL,
   created_at            TEXT NOT NULL,

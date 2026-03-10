@@ -45,6 +45,7 @@ export interface IPatient {
   nutritionTargets: INutritionTargets;
   admissionDate: string;
   dischargeDate?: string;
+  phone?: string;
   patientType?: "inpatient" | "outpatient";
   isActive: boolean;
   doctorId: string;
@@ -77,6 +78,7 @@ function rowToPatient(row: D1Row): IPatient {
     nutritionTargets: JSON.parse((row.nutrition_targets as string) || "{}"),
     admissionDate: row.admission_date as string,
     dischargeDate: row.discharge_date as string | undefined,
+    phone: row.phone as string | undefined,
     patientType: ((row.patient_type as string) ?? "inpatient") as "inpatient" | "outpatient",
     isActive: Boolean(row.is_active),
     doctorId: row.doctor_id as string,
@@ -126,9 +128,9 @@ const PatientRepo = {
         height, weight, bmi, bmi_category, bmr, activity_level,
         diagnosis, allergies, dietary_restrictions, food_preferences,
         current_diet_type, texture, nutrition_targets,
-        admission_date, discharge_date, patient_type, is_active, doctor_id,
+        admission_date, discharge_date, phone, patient_type, is_active, doctor_id,
         created_at, updated_at
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         id, patientId, data.name, data.age, data.gender,
         data.roomNumber ?? null, data.ward ?? null,
@@ -142,6 +144,7 @@ const PatientRepo = {
         JSON.stringify(data.nutritionTargets),
         data.admissionDate,
         data.dischargeDate ?? null,
+        data.phone ?? null,
         data.patientType ?? "inpatient",
         data.isActive ? 1 : 0,
         data.doctorId,
@@ -167,6 +170,7 @@ const PatientRepo = {
       currentDietType: "current_diet_type",
       texture: "texture", isActive: "is_active",
       admissionDate: "admission_date", dischargeDate: "discharge_date",
+      phone: "phone",
       patientType: "patient_type",
       doctorId: "doctor_id",
     };

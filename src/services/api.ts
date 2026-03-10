@@ -15,7 +15,7 @@ function getToken(): string | null {
   try {
     const zustand = localStorage.getItem("nutrisync-auth")
     if (zustand) return JSON.parse(zustand)?.state?.token ?? null
-  } catch (_) { /* ignore parse errors */ }
+  } catch { /* ignore parse errors */ }
   return null
 }
 

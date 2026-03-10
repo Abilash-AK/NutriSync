@@ -75,7 +75,7 @@ router.get("/:id", async (req: AuthRequest, res: Response) => {
 // POST /api/patients — create with nutrition engine
 router.post("/", async (req: AuthRequest, res: Response) => {
   const {
-    name, email, age, gender, height, weight, activityLevel,
+    name, email, phone, age, gender, height, weight, activityLevel,
     diagnosis, allergies, dietaryRestrictions, foodPreferences,
     currentDietType, texture, roomNumber, ward, admissionDate, patientType,
   } = req.body;
@@ -124,6 +124,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     patientType: patientType === "outpatient" ? "outpatient" : "inpatient",
     isActive: true,
     doctorId: req.user!.id,
+    phone: phone ?? null,
   });
 
   // Create patient login account (firstname@nutrisync.com / Patient@123)
@@ -226,7 +227,86 @@ router.patch("/:id/discharge", async (req: AuthRequest, res: Response) => {
   // Fire-and-forget: re-run diet grouping in background (don't block response)
   runDietGroupingEngine(patient.ward ?? undefined).catch(() => {});
 
+  // Send discharge webhook to WhatsApp AI agent
+  const webhookUrl = process.env.DISCHARGE_WEBHOOK_URL;
+  console.log(`[Webhook] URL=${webhookUrl ? "SET" : "MISSING"}, Phone=${patient.phone || "MISSING"}`);
+  if (webhookUrl && patient.phone) {
+    const activePlans = await MealPlanRepo.find({ patientId: patient.id });
+    const lastPlan = activePlans[0];
+    const webhookPayload = {
+      event: "patient_discharged",
+      patient: {
+        id: patient.id,
+        patientId: patient.patientId,
+        name: patient.name,
+        age: patient.age,
+        gender: patient.gender,
+        phone: patient.phone,
+        bmi: patient.bmi,
+        bmiCategory: patient.bmiCategory,
+        diagnoses: patient.diagnosis,
+        allergies: patient.allergies,
+        dietaryRestrictions: patient.dietaryRestrictions,
+        foodPreferences: patient.foodPreferences,
+        currentDietType: patient.currentDietType,
+        texture: patient.texture,
+      },
+      nutritionTargets: patient.nutritionTargets,
+      lastMealPlan: lastPlan?.days ?? [],
+      dischargedAt: now,
+    };
+    console.log(`[Webhook] Firing POST to ${webhookUrl} for patient ${patient.name} (${patient.phone})`);
+    try {
+      const resp = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(webhookPayload),
+      });
+      console.log(`[Webhook] Response: ${resp.status} ${resp.statusText}`);
+      if (!resp.ok) {
+        const body = await resp.text();
+        console.error(`[Webhook] Error body: ${body}`);
+      }
+    } catch (err: unknown) {
+      console.error("[Webhook] Network error:", err);
+    }
+  } else {
+    console.warn(`[Webhook] SKIPPED — webhookUrl=${!!webhookUrl}, phone=${!!patient.phone}`);
+  }
+
   res.json(updated);
+});
+
+// GET /api/patients/:id/discharge-summary — full data package for WhatsApp AI agent
+router.get("/:id/discharge-summary", async (req: AuthRequest, res: Response) => {
+  const patient = await PatientRepo.findById(req.params.id);
+  if (!patient) { res.status(404).json({ error: "Patient not found" }); return; }
+
+  const plans = await MealPlanRepo.find({ patientId: patient.id });
+  const lastPlan = plans[0];
+
+  res.json({
+    patient: {
+      id: patient.id,
+      patientId: patient.patientId,
+      name: patient.name,
+      age: patient.age,
+      gender: patient.gender,
+      phone: patient.phone,
+      bmi: patient.bmi,
+      bmiCategory: patient.bmiCategory,
+      diagnoses: patient.diagnosis,
+      allergies: patient.allergies,
+      dietaryRestrictions: patient.dietaryRestrictions,
+      foodPreferences: patient.foodPreferences,
+      currentDietType: patient.currentDietType,
+      texture: patient.texture,
+    },
+    nutritionTargets: patient.nutritionTargets,
+    lastMealPlan: lastPlan ? { days: lastPlan.days, weekStart: lastPlan.weekStartDate, weekEnd: lastPlan.weekEndDate } : null,
+    discharged: !!patient.dischargeDate,
+    dischargeDate: patient.dischargeDate,
+  });
 });
 
 // PATCH /api/patients/:id/diet-mode — instantly switch solid ↔ liquid diet & regenerate meal plan

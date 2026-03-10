@@ -41,6 +41,7 @@ export interface Patient {
   nutritionTargets: NutritionTargets
   roomNumber?: string
   ward?: string
+  phone?: string
   admissionDate: string
   dischargeDate?: string
   patientType: "inpatient" | "outpatient"

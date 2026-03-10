@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { reportAPI, patientAPI } from "../services/api"
+// wardSummary endpoint no longer used on this page
 import { useAlertStore } from "../store"
 import type { Patient, PatientSummary } from "../types"
 import {
@@ -9,16 +10,17 @@ import {
 import { cn } from "@/lib/utils"
 import {
   TrendingUp, TrendingDown, Minus, Flame, Beef, Wheat, Droplets,
-  Users, Activity, AlertTriangle, CheckCircle2, BarChart3, TableProperties,
+  Users, AlertTriangle, CheckCircle2, BarChart3, TableProperties,
   ArrowUpDown, ChevronUp, ChevronDown,
 } from "lucide-react"
+import { motion } from "framer-motion"
 
 // ── Color palette ─────────────────────────────────────────────────────────────
 const C = {
   protein:    { solid: "#6366f1", light: "#ede9fe", text: "text-indigo-600" },
   carbs:      { solid: "#f59e0b", light: "#fef3c7", text: "text-amber-600"  },
   fat:        { solid: "#f43f5e", light: "#ffe4e6", text: "text-rose-500"   },
-  calories:   { solid: "#0d9488", light: "#ccfbf1", text: "text-teal-600"   },
+  calories:   { solid: "#7c3aed", light: "#ede9fe", text: "text-violet-600"   },
   compliance: { solid: "#10b981", light: "#d1fae5", text: "text-emerald-600"},
   eaten:      "#22c55e",
   partial:    "#f59e0b",
@@ -105,14 +107,6 @@ function MacroPill({
   )
 }
 
-interface WardSummary {
-  date: string
-  totalPatients: number
-  trackedToday: number
-  avgCompliance: number
-  highAlertCount: number
-}
-
 interface PatientReport {
   patientId: string
   weekStart: string
@@ -148,9 +142,8 @@ export default function Analytics() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [selectedId, setSelectedId] = useState("")
   const [report, setReport] = useState<PatientReport | null>(null)
-  const [ward, setWard] = useState<WardSummary | null>(null)
   const [loading, setLoading] = useState(false)
-  const [tab, setTab] = useState<"patient" | "ward" | "summary">("patient")
+  const [tab, setTab] = useState<"patient" | "summary">("patient")
 
   // Summary tab state
   const [summary, setSummary] = useState<PatientSummary[]>([])
@@ -164,7 +157,6 @@ export default function Analytics() {
       setPatients(data)
       if (data.length > 0) setSelectedId(data[0]._id)
     }).catch(() => push({ type: "error", message: "Failed to load patients" }))
-    reportAPI.wardSummary().then(({ data }) => setWard(data)).catch(() => {})
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -221,16 +213,21 @@ export default function Analytics() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Analytics & Reports</h1>
           <p className="text-sm text-gray-500">Compliance trends, macro tracking, and ward overview</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Tabs — pill style */}
       <div className="flex gap-1 rounded-xl bg-gray-100 p-1 w-fit">
-        {(["patient", "ward", "summary"] as const).map((t) => (
+        {(["patient", "summary"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -243,9 +240,7 @@ export default function Analytics() {
           >
             {t === "patient"
               ? <><BarChart3 size={14} />Patient Report</>
-              : t === "ward"
-                ? <><Activity size={14} />Ward Summary</>
-                : <><TableProperties size={14} />All Patients</>}
+              : <><TableProperties size={14} />All Patients</>}
           </button>
         ))}
       </div>
@@ -259,7 +254,7 @@ export default function Analytics() {
             <select
               value={selectedId}
               onChange={(e) => setSelectedId(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 transition"
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition"
             >
               {patients.map((p) => (
                 <option key={p._id} value={p._id}>{p.name}</option>
@@ -291,24 +286,32 @@ export default function Analytics() {
 
               {/* KPI cards */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.4 }}>
                 <KpiCard
                   label="Compliance" value={report.complianceRate.toFixed(1)} suffix="%"
-                  icon={CheckCircle2} gradient="bg-linear-to-br from-emerald-500 to-teal-600"
+                  icon={CheckCircle2} gradient="bg-linear-to-br from-violet-500 to-indigo-600"
                   trend={report.complianceRate} trendLabel="weekly avg"
                 />
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.4 }}>
                 <KpiCard
                   label="Acceptance" value={(100 - report.refusalRate).toFixed(1)} suffix="%"
                   icon={TrendingUp} gradient="bg-linear-to-br from-indigo-500 to-purple-600"
                   trend={100 - report.refusalRate} trendLabel="of meals accepted"
                 />
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.4 }}>
                 <KpiCard
                   label="Avg Calories" value={report.avgCalories.toFixed(0)} suffix=" kcal"
-                  icon={Flame} gradient="bg-linear-to-br from-teal-500 to-cyan-600"
+                  icon={Flame} gradient="bg-linear-to-br from-indigo-500 to-violet-600"
                 />
+                </motion.div>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.34, duration: 0.4 }}>
                 <KpiCard
                   label="Avg Protein" value={report.avgProtein.toFixed(1)} suffix="g"
                   icon={Beef} gradient="bg-linear-to-br from-violet-500 to-indigo-600"
                 />
+                </motion.div>
               </div>
 
               {/* Macro averages */}
@@ -357,7 +360,12 @@ export default function Analytics() {
               </svg>
 
               {/* Macronutrient area chart */}
-              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.5 }}
+                className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
+              >
                 <div className="flex items-center justify-between px-6 pt-5 pb-3">
                   <div>
                     <h3 className="text-sm font-bold text-gray-800">Daily Macronutrients</h3>
@@ -390,10 +398,15 @@ export default function Analytics() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Calories + compliance area chart */}
-              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.5 }}
+                className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
+              >
                 <div className="flex items-center justify-between px-6 pt-5 pb-3">
                   <div>
                     <h3 className="text-sm font-bold text-gray-800">Calories & Compliance</h3>
@@ -427,10 +440,15 @@ export default function Analytics() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Meal status histogram + donut */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45, duration: 0.5 }}
+                className="grid grid-cols-1 gap-4 lg:grid-cols-3"
+              >
                 {/* Histogram */}
                 <div className="lg:col-span-2 rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
                   <div className="px-6 pt-5 pb-3">
@@ -509,88 +527,8 @@ export default function Analytics() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </>
-          )}
-        </div>
-      )}
-
-      {/* ── Ward tab ── */}
-      {tab === "ward" && (
-        <div className="space-y-5">
-          {ward ? (
-            <>
-              {/* Ward KPI cards */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <KpiCard label="Total Patients" value={ward.totalPatients} icon={Users}
-                  gradient="bg-linear-to-br from-teal-500 to-emerald-600" />
-                <KpiCard label="Tracked Today" value={ward.trackedToday} icon={Activity}
-                  gradient="bg-linear-to-br from-indigo-500 to-violet-600" />
-                <KpiCard label="Avg Compliance" value={ward.avgCompliance.toFixed(1)} suffix="%"
-                  icon={TrendingUp} gradient="bg-linear-to-br from-cyan-500 to-teal-600"
-                  trend={ward.avgCompliance} trendLabel="today vs target" />
-                <KpiCard label="High Alerts" value={ward.highAlertCount} icon={AlertTriangle}
-                  gradient={ward.highAlertCount > 0 ? "bg-linear-to-br from-rose-500 to-red-600" : "bg-linear-to-br from-gray-400 to-gray-500"} />
-              </div>
-
-              {/* Tracking coverage */}
-              <div className="rounded-2xl border border-gray-100 bg-white shadow-sm p-6 space-y-5">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-700">Tracking Coverage</span>
-                    <span className="text-sm font-bold text-gray-900">{ward.trackedToday} / {ward.totalPatients}</span>
-                  </div>
-                  <div className="h-4 rounded-full bg-gray-100 overflow-hidden shadow-inner">
-                    <div
-                      className="h-full rounded-full bg-linear-to-r from-teal-400 to-emerald-500 transition-all duration-700 shadow-sm"
-                      style={{ width: `${ward.totalPatients ? (ward.trackedToday / ward.totalPatients) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between mt-1.5 text-xs text-gray-400">
-                    <span>0</span>
-                    <span className="font-medium text-teal-600">
-                      {ward.totalPatients ? ((ward.trackedToday / ward.totalPatients) * 100).toFixed(0) : 0}% tracked
-                    </span>
-                    <span>{ward.totalPatients}</span>
-                  </div>
-                </div>
-
-                {/* Compliance gauge bar */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-700">Avg Meal Compliance</span>
-                    <span className={cn("text-sm font-bold",
-                      ward.avgCompliance >= 75 ? "text-emerald-600" : ward.avgCompliance >= 50 ? "text-amber-600" : "text-red-500"
-                    )}>{ward.avgCompliance.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-4 rounded-full bg-gray-100 overflow-hidden shadow-inner">
-                    <div
-                      className={cn("h-full rounded-full transition-all duration-700",
-                        ward.avgCompliance >= 75
-                          ? "bg-linear-to-r from-emerald-400 to-green-500"
-                          : ward.avgCompliance >= 50
-                            ? "bg-linear-to-r from-amber-400 to-yellow-400"
-                            : "bg-linear-to-r from-red-400 to-rose-500"
-                      )}
-                      style={{ width: `${ward.avgCompliance}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {ward.highAlertCount > 0 && (
-                <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-linear-to-r from-red-50 to-rose-50 p-4">
-                  <AlertTriangle size={16} className="text-red-500 mt-0.5 shrink-0" />
-                  <p className="text-sm text-red-700 font-medium">
-                    {ward.highAlertCount} patient{ward.highAlertCount > 1 ? "s" : ""} with low compliance today — immediate review required.
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 animate-pulse">
-              {[1,2,3,4].map((i) => <div key={i} className="h-28 rounded-2xl bg-gray-100" />)}
-            </div>
           )}
         </div>
       )}
@@ -621,8 +559,8 @@ export default function Analytics() {
 
         const SortIcon = ({ col }: { col: keyof PatientSummary }) =>
           sortBy !== col ? <ArrowUpDown size={11} className="text-gray-300" /> :
-          sortDir === "asc" ? <ChevronUp size={11} className="text-teal-500" /> :
-          <ChevronDown size={11} className="text-teal-500" />
+          sortDir === "asc" ? <ChevronUp size={11} className="text-violet-500" /> :
+          <ChevronDown size={11} className="text-violet-500" />
 
         const statusBadge = (s: "good" | "warning" | "critical") => ({
           good:     "bg-emerald-100 text-emerald-700",
@@ -642,7 +580,7 @@ export default function Analytics() {
                 <select
                   value={summaryDays}
                   onChange={(e) => setSummaryDays(Number(e.target.value))}
-                  className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
                 >
                   {[7, 14, 21, 30].map((d) => (
                     <option key={d} value={d}>Last {d} days</option>
@@ -651,7 +589,7 @@ export default function Analytics() {
               </div>
               <div className="flex gap-2 flex-wrap">
                 {[
-                  { label: "Total Patients", value: summary.length, color: "bg-linear-to-br from-teal-500 to-emerald-600" },
+                  { label: "Total Patients", value: summary.length, color: "bg-linear-to-br from-violet-500 to-indigo-600" },
                   { label: "Avg Compliance", value: `${avgComp}%`, color: "bg-linear-to-br from-indigo-500 to-violet-600" },
                   { label: "Good", value: good, color: "bg-linear-to-br from-emerald-500 to-green-600" },
                   { label: "Warning", value: warning, color: "bg-linear-to-br from-amber-500 to-orange-500" },
@@ -666,7 +604,12 @@ export default function Analytics() {
             </div>
 
             {/* Table */}
-            <div className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.45 }}
+              className="rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden"
+            >
               {summaryLoading ? (
                 <div className="space-y-2 p-6 animate-pulse">
                   {[...Array(8)].map((_, i) => <div key={i} className="h-10 rounded-xl bg-gray-100" />)}
@@ -748,7 +691,7 @@ export default function Analytics() {
                   </table>
                 </div>
               )}
-            </div>
+            </motion.div>
           </div>
         )
       })()}

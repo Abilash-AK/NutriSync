@@ -10,44 +10,54 @@ import { cn } from "@/lib/utils"
 import {
   Users, Plus, Wand2, RefreshCw, AlertTriangle,
   Activity, Flame, Droplets, ChevronDown, ChevronUp,
-  Edit3, Save, X, Eye, GlassWater, Utensils,
+  Edit3, Save, X, Eye, GlassWater, Utensils, LogOut, RotateCcw,
 } from "lucide-react"
+import { motion } from "framer-motion"
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
-function StatCard({ label, value, icon: Icon, color }: {
-  label: string; value: string | number; icon: React.ElementType; color: string
+function StatCard({ label, value, icon: Icon, color, index = 0 }: {
+  label: string; value: string | number; icon: React.ElementType; color: string; index?: number
 }) {
   return (
-    <Card className="border-gray-200 bg-white shadow-sm">
-      <CardContent className="flex items-center gap-4 p-4">
-        <div className={cn("flex size-10 items-center justify-center rounded-xl shadow-sm", color)}>
-          <Icon size={18} className="text-white" />
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">{label}</p>
-          <p className="text-xl font-bold text-gray-900">{value}</p>
-        </div>
-      </CardContent>
-    </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.08, duration: 0.4 }}
+    >
+      <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group card-hover">
+        <CardContent className="flex items-center gap-4 p-5">
+          <div className={cn(
+            "flex size-11 items-center justify-center rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3",
+            color
+          )}>
+            <Icon size={19} className="text-white" />
+          </div>
+          <div>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</p>
+            <p className="text-2xl font-extrabold text-gray-900">{value}</p>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }
 
 // ── Diet type badge ───────────────────────────────────────────────────────────
 const DIET_COLORS: Record<string, string> = {
-  diabetic: "bg-orange-500/20 text-orange-300",
-  renal: "bg-blue-500/20 text-blue-300",
-  cardiac: "bg-red-500/20 text-red-300",
-  liquid: "bg-cyan-500/20 text-cyan-300",
-  soft: "bg-teal-500/20 text-teal-300",
-  regular: "bg-gray-100 text-gray-600",
-  vegetarian: "bg-green-500/20 text-green-300",
+  diabetic: "bg-orange-100 text-orange-700 border border-orange-200",
+  renal: "bg-blue-100 text-blue-700 border border-blue-200",
+  cardiac: "bg-red-100 text-red-700 border border-red-200",
+  liquid: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+  soft: "bg-purple-100 text-purple-700 border border-purple-200",
+  regular: "bg-gray-100 text-gray-600 border border-gray-200",
+  vegetarian: "bg-green-100 text-green-700 border border-green-200",
 }
 
 function DietBadge({ diet }: { diet: string }) {
   return (
     <span className={cn(
       "rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-      DIET_COLORS[diet] ?? "bg-teal-100 text-teal-700"
+      DIET_COLORS[diet] ?? "bg-violet-100 text-violet-700"
     )}>
       {diet}
     </span>
@@ -115,7 +125,7 @@ function DietPlanEditor({ plan, onClose, onSaved }: {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" onClick={handleSave} disabled={saving} className="bg-teal-600 hover:bg-teal-700 gap-1.5">
+            <Button size="sm" onClick={handleSave} disabled={saving} className="bg-violet-600 hover:bg-violet-700 gap-1.5">
               <Save size={14} />
               {saving ? "Saving…" : "Save Changes"}
             </Button>
@@ -134,7 +144,7 @@ function DietPlanEditor({ plan, onClose, onSaved }: {
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap",
                 selectedDay === i
-                  ? "bg-teal-600 text-white"
+                  ? "bg-violet-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )}
             >
@@ -260,7 +270,7 @@ function MealPlanViewer({ plan, onClose, onEdit }: {
               className={cn(
                 "px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap",
                 selectedDay === i
-                  ? "bg-teal-600 text-white"
+                  ? "bg-violet-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )}
             >
@@ -336,7 +346,7 @@ function PatientForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
   const push = useAlertStore((s) => s.push)
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
-    name: "", email: "", age: 45, gender: "male" as Gender,
+    name: "", email: "", phone: "", age: 45, gender: "male" as Gender,
     height: 165, weight: 70, activityLevel: "sedentary" as ActivityLevel,
     diagnosis: "", allergies: "", dietaryRestrictions: "", foodPreferences: "",
     currentDietType: "regular" as DietType, texture: "regular" as TextureType,
@@ -407,6 +417,7 @@ function PatientForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
           <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3">
             {field("Full Name", "name", "text", { required: true })}
             {field("Email", "email", "email", { required: true, placeholder: "firstname@nutrisync.com" })}
+            {field("Phone (WhatsApp)", "phone", "tel", { placeholder: "+91XXXXXXXXXX" })}
             {field("Age", "age", "number", { min: 1, max: 120 })}
             {select("Gender", "gender", ["male", "female", "other"])}
             {select("Activity Level", "activityLevel", ACTIVITY_LEVELS)}
@@ -444,7 +455,7 @@ function PatientForm({ onClose, onCreated }: { onClose: () => void; onCreated: (
 
             <div className="col-span-2 flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={onClose} className="border-gray-200 text-gray-600">Cancel</Button>
-              <Button type="submit" disabled={loading} className="bg-teal-600 hover:bg-teal-700">
+              <Button type="submit" disabled={loading} className="bg-violet-600 hover:bg-violet-700">
                 {loading ? "Saving…" : "Register Patient"}
               </Button>
             </div>
@@ -465,9 +476,42 @@ function PatientRow({ patient, onViewPlan, onRegenerate, onPatientUpdated }: {
   const push = useAlertStore((s) => s.push)
   const [expanded, setExpanded] = useState(false)
   const [switching, setSwitching] = useState(false)
+  const [discharging, setDischarging] = useState(false)
   const t = patient.nutritionTargets
 
   const isLiquid = patient.currentDietType === "liquid" || patient.texture === "liquid"
+  const isOutpatient = patient.patientType === "outpatient"
+
+  const handleDischarge = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (discharging) return
+    if (!confirm(`Discharge ${patient.name}? This will mark them as outpatient and send their diet plan via WhatsApp.`)) return
+    setDischarging(true)
+    try {
+      const { data } = await patientAPI.discharge(patient._id)
+      onPatientUpdated(data)
+      push({ type: "success", message: `${patient.name} discharged. Diet plan sent to WhatsApp.` })
+    } catch {
+      push({ type: "error", message: "Failed to discharge patient" })
+    } finally {
+      setDischarging(false)
+    }
+  }
+
+  const handleReadmit = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (discharging) return
+    setDischarging(true)
+    try {
+      const { data } = await patientAPI.readmit(patient._id)
+      onPatientUpdated(data)
+      push({ type: "success", message: `${patient.name} re-admitted.` })
+    } catch {
+      push({ type: "error", message: "Failed to readmit patient" })
+    } finally {
+      setDischarging(false)
+    }
+  }
 
   const handleSetDietMode = async (mode: "solid" | "liquid", e: React.MouseEvent) => {
     e.stopPropagation()
@@ -486,27 +530,33 @@ function PatientRow({ patient, onViewPlan, onRegenerate, onPatientUpdated }: {
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 card-hover">
       <div
-        className="flex cursor-pointer items-center gap-4 p-4 hover:bg-gray-50"
+        className="flex cursor-pointer items-center gap-4 p-4 hover:bg-gray-50/70 transition-colors"
         onClick={() => setExpanded((x) => !x)}
       >
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-700 text-sm font-bold">
+          {patient.name[0]?.toUpperCase()}
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="font-semibold text-gray-900 truncate">{patient.name}</p>
             <DietBadge diet={patient.currentDietType} />
+            {isOutpatient && (
+              <span className="rounded-full bg-gray-100 border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500">Discharged</span>
+            )}
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 mt-0.5">
             {patient.patientId} · {patient.age}y · {patient.gender} · {patient.roomNumber ?? "—"} · {patient.ward ?? "—"}
           </p>
         </div>
         <div className="hidden w-40 sm:block">
           <BMIBar bmi={patient.bmi} />
-          <p className="text-xs text-gray-500 mt-1">{patient.bmiCategory}</p>
+          <p className="text-xs text-gray-500 mt-1 capitalize">{patient.bmiCategory}</p>
         </div>
         <div className="hidden text-right sm:block">
-          <p className="text-sm font-semibold text-teal-600">{t.calories} kcal</p>
-          <p className="text-xs text-gray-500">daily target</p>
+          <p className="text-sm font-bold text-violet-600">{t.calories} kcal</p>
+          <p className="text-[11px] text-gray-400">daily target</p>
         </div>
           {expanded ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
       </div>
@@ -556,7 +606,7 @@ function PatientRow({ patient, onViewPlan, onRegenerate, onPatientUpdated }: {
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 font-medium transition",
                   !isLiquid
-                    ? "bg-teal-600 text-white"
+                    ? "bg-violet-600 text-white"
                     : "bg-white text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed"
                 )}
               >
@@ -569,7 +619,7 @@ function PatientRow({ patient, onViewPlan, onRegenerate, onPatientUpdated }: {
                 className={cn(
                   "flex items-center gap-1.5 border-l border-gray-200 px-3 py-1.5 font-medium transition",
                   isLiquid
-                    ? "bg-teal-600 text-white"
+                    ? "bg-violet-600 text-white"
                     : "bg-white text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed"
                 )}
               >
@@ -578,11 +628,34 @@ function PatientRow({ patient, onViewPlan, onRegenerate, onPatientUpdated }: {
               </button>
             </div>
             {switching && (
-              <span className="animate-pulse text-xs text-teal-600">Updating patient &amp; regenerating meal plan…</span>
+              <span className="animate-pulse text-xs text-violet-600">Updating patient &amp; regenerating meal plan…</span>
             )}
           </div>
 
           <div className="flex justify-end gap-2">
+            {isOutpatient ? (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-blue-200 text-blue-600 hover:bg-blue-50 gap-1.5"
+                onClick={handleReadmit}
+                disabled={discharging}
+              >
+                <RotateCcw size={14} />
+                {discharging ? "Processing…" : "Re-admit"}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-200 text-red-600 hover:bg-red-50 gap-1.5"
+                onClick={handleDischarge}
+                disabled={discharging}
+              >
+                <LogOut size={14} />
+                {discharging ? "Processing…" : "Discharge"}
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"
@@ -594,7 +667,7 @@ function PatientRow({ patient, onViewPlan, onRegenerate, onPatientUpdated }: {
             </Button>
             <Button
               size="sm"
-              className="bg-teal-600 hover:bg-teal-700 gap-1.5"
+              className="bg-violet-600 hover:bg-violet-700 gap-1.5"
               onClick={() => onRegenerate(patient)}
             >
               <Wand2 size={14} />
@@ -683,7 +756,12 @@ export default function DoctorDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h1>
           <p className="text-sm text-gray-500">Patient EMR & Nutrition Management</p>
@@ -694,60 +772,85 @@ export default function DoctorDashboard() {
             <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
             Refresh
           </Button>
-          <Button size="sm" onClick={() => setShowForm(true)} className="bg-teal-600 hover:bg-teal-700 gap-1.5">
+          <Button size="sm" onClick={() => setShowForm(true)} className="bg-violet-600 hover:bg-violet-700 gap-1.5 hover:scale-105 active:scale-95 transition-transform">
             <Plus size={14} />
             New Patient
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Auto-generation notice */}
-      <div className="flex items-center gap-3 rounded-xl border border-teal-200 bg-teal-50 p-3">
-        <Wand2 size={16} className="text-teal-600 shrink-0" />
-        <p className="text-sm text-teal-700">
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.15, duration: 0.45 }}
+        className="flex items-center gap-3 rounded-xl border border-violet-200 bg-linear-to-r from-violet-50 to-indigo-50 p-4">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-violet-100">
+          <Wand2 size={15} className="text-violet-600" />
+        </div>
+        <p className="text-sm text-violet-700">
           <strong>Auto-pilot:</strong> Registering or updating a patient automatically generates a 7-day meal plan and diet grouping.
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Active Patients" value={activeCount} icon={Users} color="bg-teal-600" />
-        <StatCard label="Diabetic Diet" value={diabeticCount} icon={Activity} color="bg-orange-500" />
-        <StatCard label="Renal Diet" value={renalCount} icon={Droplets} color="bg-blue-500" />
-        <StatCard label="Generating" value={isGenerating ? "…" : "—"} icon={Flame} color="bg-emerald-600" />
+        <StatCard label="Active Patients" value={activeCount} icon={Users} color="bg-violet-600" index={0} />
+        <StatCard label="Diabetic Diet" value={diabeticCount} icon={Activity} color="bg-orange-500" index={1} />
+        <StatCard label="Renal Diet" value={renalCount} icon={Droplets} color="bg-blue-500" index={2} />
+        <StatCard label="Generating" value={isGenerating ? "…" : "—"} icon={Flame} color="bg-indigo-600" index={3} />
       </div>
 
       {/* Search */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35, duration: 0.4 }}
+        className="relative max-w-md"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         <Input
           placeholder="Search patients by name, ID or ward…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border-gray-200 bg-gray-50 text-gray-900 placeholder:text-gray-400 max-w-md"
+          className="border-gray-200 bg-white/80 backdrop-blur-sm text-gray-900 placeholder:text-gray-400 pl-9 shadow-sm focus:shadow-lg focus:ring-2 focus:ring-violet-200 transition-all duration-300"
         />
-      </div>
+      </motion.div>
 
       {/* Patient list */}
       <div className="space-y-3">
         {isLoading ? (
-          <div className="text-center text-gray-400 py-12">Loading patients…</div>
-        ) : filtered.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-12 text-center text-gray-400">
-            No patients found. Register your first patient to get started.
+          <div className="flex items-center justify-center gap-3 py-12">
+            <svg className="animate-spin size-5 text-violet-500" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            <span className="text-gray-400">Loading patients…</span>
           </div>
+        ) : filtered.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm p-12 text-center text-gray-400"
+          >
+            No patients found. Register your first patient to get started.
+          </motion.div>
         ) : (
-          filtered.map((p) => (
-            <PatientRow
+          filtered.map((p, i) => (
+            <motion.div
               key={p._id}
-              patient={p}
-              onViewPlan={handleViewPlan}
-              onRegenerate={handleRegenerate}
-              onPatientUpdated={(updated) =>
-                setPatients(patients.map((existing) =>
-                  existing._id === updated._id ? updated : existing
-                ))
-              }
-            />
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + i * 0.04, duration: 0.35 }}
+            >
+              <PatientRow
+                patient={p}
+                onViewPlan={handleViewPlan}
+                onRegenerate={handleRegenerate}
+                onPatientUpdated={(updated) =>
+                  setPatients(patients.map((existing) =>
+                    existing._id === updated._id ? updated : existing
+                  ))
+                }
+              />
+            </motion.div>
           ))
         )}
       </div>

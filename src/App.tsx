@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom"
 import { useAuthStore } from "./store"
 import AppLayout from "./components/AppLayout"
+import HomePage from "./pages/HomePage"
 import LoginPage from "./pages/LoginPage"
 import DoctorDashboard from "./pages/DoctorDashboard"
 import PatientDashboard from "./pages/PatientDashboard"
@@ -27,10 +28,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
-            <Route index element={<RoleBasedIndex />} />
+            <Route path="dashboard" element={<RoleBasedIndex />} />
             <Route path="doctor" element={<DoctorDashboard />} />
             <Route path="patient" element={<PatientDashboard />} />
             <Route path="kitchen" element={<KitchenDashboard />} />
@@ -40,7 +42,7 @@ function App() {
             <Route path="orders" element={<OrdersPage />} />
           </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

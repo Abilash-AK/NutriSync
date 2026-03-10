@@ -8,6 +8,7 @@ import {
   ChefHat, Users, Clock, ChevronDown, ChevronUp,
   CheckCircle2, Flame, RefreshCw, UtensilsCrossed,
 } from "lucide-react"
+import { motion } from "framer-motion"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -64,7 +65,7 @@ const DIET_BADGE: Record<string, string> = {
   cardiac:  "bg-red-100 text-red-700 border-red-200",
   regular:  "bg-gray-100 text-gray-700 border-gray-200",
   liquid:   "bg-cyan-100 text-cyan-700 border-cyan-200",
-  soft:     "bg-teal-100 text-teal-700 border-teal-200",
+  soft:     "bg-purple-100 text-purple-700 border-purple-200",
 }
 
 const STATUS_CONFIG = {
@@ -108,7 +109,7 @@ function OrderCard({
               className={cn(
                 "flex size-9 items-center justify-center rounded-xl text-sm font-bold",
                 order.queuePosition <= 3
-                  ? "bg-linear-to-br from-teal-500 to-emerald-600 text-white shadow-sm"
+                  ? "bg-linear-to-br from-violet-500 to-indigo-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-500"
               )}
             >
@@ -143,7 +144,7 @@ function OrderCard({
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <UtensilsCrossed size={15} className="text-teal-600" />
+                <UtensilsCrossed size={15} className="text-violet-600" />
                 <span className="font-semibold text-gray-900">{order.meal.name}</span>
               </div>
               <p className="text-xs text-gray-400 mt-0.5">{order.meal.portionSize} · {order.calorieRange}</p>
@@ -174,9 +175,9 @@ function OrderCard({
             {order.meal.ingredients.map((ing, i) => (
               <span
                 key={i}
-                className="rounded-full bg-teal-50 border border-teal-100 px-2 py-0.5 text-[11px] text-teal-700"
+                className="rounded-full bg-violet-50 border border-violet-100 px-2 py-0.5 text-[11px] text-violet-700"
               >
-                {ing.name} <span className="text-teal-400">({ing.quantity}{ing.unit})</span>
+                {ing.name} <span className="text-violet-400">({ing.quantity}{ing.unit})</span>
               </span>
             ))}
           </div>
@@ -198,31 +199,31 @@ function OrderCard({
             className="flex w-full items-center justify-between rounded-xl bg-gray-50 border border-gray-100 px-3.5 py-2.5 text-xs font-medium text-gray-600 hover:bg-gray-100 transition"
           >
             <span className="flex items-center gap-1.5">
-              <ChefHat size={13} className="text-teal-600" />
+              <ChefHat size={13} className="text-violet-600" />
               Recipe & Preparation
             </span>
             {recipeOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
 
           {recipeOpen && (
-            <div className="rounded-xl bg-linear-to-br from-teal-50 to-emerald-50 border border-teal-100 p-4 space-y-3 animate-in fade-in-0 slide-in-from-top-1 duration-200">
+            <div className="rounded-xl bg-linear-to-br from-violet-50 to-indigo-50 border border-violet-100 p-4 space-y-3 animate-in fade-in-0 slide-in-from-top-1 duration-200">
               <p className="text-sm text-gray-700 leading-relaxed">
                 {order.meal.preparationInstructions}
               </p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-white/70 border border-teal-100/50 p-2 text-center">
+                <div className="rounded-lg bg-white/70 border border-violet-100/50 p-2 text-center">
                   <p className="text-[10px] text-gray-400">Sodium</p>
                   <p className="text-xs font-bold text-gray-700">{order.meal.nutrition.sodium}mg</p>
                 </div>
-                <div className="rounded-lg bg-white/70 border border-teal-100/50 p-2 text-center">
+                <div className="rounded-lg bg-white/70 border border-violet-100/50 p-2 text-center">
                   <p className="text-[10px] text-gray-400">Potassium</p>
                   <p className="text-xs font-bold text-gray-700">{order.meal.nutrition.potassium}mg</p>
                 </div>
-                <div className="rounded-lg bg-white/70 border border-teal-100/50 p-2 text-center">
+                <div className="rounded-lg bg-white/70 border border-violet-100/50 p-2 text-center">
                   <p className="text-[10px] text-gray-400">Fiber</p>
                   <p className="text-xs font-bold text-gray-700">{order.meal.nutrition.fiber}g</p>
                 </div>
-                <div className="rounded-lg bg-white/70 border border-teal-100/50 p-2 text-center">
+                <div className="rounded-lg bg-white/70 border border-violet-100/50 p-2 text-center">
                   <p className="text-[10px] text-gray-400">Servings</p>
                   <p className="text-xs font-bold text-gray-700">{order.patientCount} plates</p>
                 </div>
@@ -345,7 +346,12 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Kitchen Orders</h1>
           <p className="text-sm text-gray-500">
@@ -357,22 +363,28 @@ export default function OrdersPage() {
           size="sm"
           onClick={() => fetchOrders()}
           disabled={loading}
-          className="border-gray-200 text-gray-600 gap-1.5"
+          className="border-gray-200 text-gray-600 gap-1.5 hover:scale-105 active:scale-95 transition-transform"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           Refresh
         </Button>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Total Orders", value: orders.length, sub: `${totalServings} servings`, color: "from-teal-500 to-emerald-600" },
+          { label: "Total Orders", value: orders.length, sub: `${totalServings} servings`, color: "from-violet-500 to-indigo-600" },
           { label: "Pending",      value: pendingCount,   sub: "in queue",               color: "from-amber-400 to-orange-500" },
           { label: "Preparing",    value: preparingCount,  sub: "in progress",            color: "from-blue-500 to-indigo-600" },
-          { label: "Completed",    value: doneCount,       sub: "ready to serve",         color: "from-green-500 to-emerald-600" },
-        ].map((s) => (
-          <Card key={s.label} className="border-gray-200 bg-white shadow-sm overflow-hidden">
+          { label: "Completed",    value: doneCount,       sub: "ready to serve",         color: "from-green-500 to-indigo-600" },
+        ].map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
+          >
+          <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 card-hover">
             <CardContent className="p-4 relative">
               <div className={cn("absolute inset-y-0 left-0 w-1 bg-linear-to-b", s.color)} />
               <p className="text-xs text-gray-500 ml-2">{s.label}</p>
@@ -380,6 +392,7 @@ export default function OrdersPage() {
               <p className="text-[10px] text-gray-400 ml-2">{s.sub}</p>
             </CardContent>
           </Card>
+          </motion.div>
         ))}
       </div>
 
@@ -392,14 +405,14 @@ export default function OrdersPage() {
             className={cn(
               "flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap border",
               mealType === mt.key
-                ? "bg-teal-600 text-white border-teal-600 shadow-sm"
+                ? "bg-violet-600 text-white border-violet-600 shadow-sm"
                 : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
             )}
           >
             <span>{mt.icon}</span>
             <div className="text-left">
               <p className="leading-tight">{mt.label}</p>
-              <p className={cn("text-[10px]", mealType === mt.key ? "text-teal-200" : "text-gray-400")}>
+              <p className={cn("text-[10px]", mealType === mt.key ? "text-violet-200" : "text-gray-400")}>
                 {mt.time}
               </p>
             </div>
@@ -409,8 +422,9 @@ export default function OrdersPage() {
 
       {/* Queue */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <RefreshCw size={24} className="animate-spin text-teal-500" />
+        <div className="flex items-center justify-center gap-3 py-16">
+          <svg className="animate-spin size-5 text-violet-500" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          <span className="text-gray-400">Loading orders…</span>
         </div>
       ) : sortedOrders.length === 0 ? (
         <Card className="border-gray-200 bg-white">
@@ -422,13 +436,19 @@ export default function OrdersPage() {
         </Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          {sortedOrders.map((order) => (
-            <OrderCard
+          {sortedOrders.map((order, i) => (
+            <motion.div
               key={order.groupCode}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 + i * 0.04, duration: 0.35 }}
+            >
+            <OrderCard
               order={order}
               onStatusChange={handleStatusChange}
               isLoading={actionLoading === order.groupCode}
             />
+            </motion.div>
           ))}
         </div>
       )}

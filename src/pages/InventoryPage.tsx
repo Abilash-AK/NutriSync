@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { Package, Plus, Search, X, AlertTriangle } from "lucide-react"
+import { motion } from "framer-motion"
 
 const CATEGORIES = ["grains", "protein", "dairy", "vegetable", "fruit", "fat", "beverage", "supplement", "other"]
 
@@ -44,11 +45,14 @@ function AddIngredientModal({ onClose, onSaved }: { onClose: () => void; onSaved
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white shadow-2xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-gray-900">Add Ingredient</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+          <div>
+            <h2 className="font-bold text-gray-900">Add Ingredient</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Add a new item to the kitchen inventory</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition"><X size={18} /></button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -128,7 +132,7 @@ function AddIngredientModal({ onClose, onSaved }: { onClose: () => void; onSaved
 
         <div className="flex gap-2 pt-2">
           <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
-          <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={save} disabled={saving}>
+          <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={save} disabled={saving}>
             {saving ? "Saving…" : "Add Ingredient"}
           </Button>
         </div>
@@ -192,44 +196,61 @@ export default function InventoryPage() {
     <div className="space-y-6">
       {showAdd && <AddIngredientModal onClose={() => setShowAdd(false)} onSaved={fetchAll} />}
 
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Ingredient Inventory</h1>
           <p className="text-sm text-gray-500">Kitchen stock management and tracking</p>
         </div>
-        <Button className="bg-teal-600 hover:bg-teal-700 gap-1.5" onClick={() => setShowAdd(true)}>
+        <Button className="bg-violet-600 hover:bg-violet-700 gap-1.5 hover:scale-105 active:scale-95 transition-transform" onClick={() => setShowAdd(true)}>
           <Plus size={15} />
           Add Ingredient
         </Button>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Total Items", value: ingredients.length, color: "bg-blue-500" },
-          { label: "In Stock", value: ingredients.filter((i) => i.isAvailable).length, color: "bg-emerald-500" },
+          { label: "In Stock", value: ingredients.filter((i) => i.isAvailable).length, color: "bg-indigo-500" },
           { label: "Low / Out of Stock", value: lowStock.length, color: lowStock.length > 0 ? "bg-red-500" : "bg-gray-400" },
-        ].map((s) => (
-          <Card key={s.label} className="border-gray-200 bg-white shadow-sm">
+        ].map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
+          >
+          <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group card-hover">
             <CardContent className="flex items-center gap-3 p-4">
-              <div className={cn("flex size-10 items-center justify-center rounded-xl", s.color)}>
-                <Package size={18} className="text-white" />
+              <div className={cn("flex size-11 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3", s.color)}>
+                <Package size={19} className="text-white" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">{s.label}</p>
-                <p className="text-xl font-bold text-gray-900">{s.value}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{s.label}</p>
+                <p className="text-2xl font-extrabold text-gray-900">{s.value}</p>
               </div>
             </CardContent>
           </Card>
+          </motion.div>
         ))}
       </div>
 
       {/* Low stock banner */}
       {lowStock.length > 0 && (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.45 }}
+          className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+        >
           <AlertTriangle size={16} className="shrink-0" />
           Low stock: {lowStock.map((i) => i.name).join(", ")}
-        </div>
+        </motion.div>
       )}
 
       {/* Filters */}
@@ -240,7 +261,7 @@ export default function InventoryPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search ingredients…"
-            className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-violet-500"
           />
         </div>
         <select
@@ -254,16 +275,21 @@ export default function InventoryPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.45 }}
+        className="overflow-x-auto rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm"
+      >
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
+            <tr className="border-b border-gray-200 bg-gray-50/80">
               {["Ingredient", "Category", "Macros /100g", "Stock", "Reorder", "Allergens", "Actions"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500">{h}</th>
+                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-12 text-center text-gray-400">No ingredients found.</td>
@@ -271,10 +297,10 @@ export default function InventoryPage() {
             ) : filtered.map((ing) => {
               const isLow = ing.stockQty <= ing.reorderLevel
               return (
-                <tr key={ing._id} className={cn("border-b border-gray-100 hover:bg-gray-50", isLow && "bg-red-50")}>
+                <tr key={ing._id} className={cn("hover:bg-gray-50/70 transition-colors", isLow && "bg-red-50/60")}>
                   <td className="px-4 py-3">
                     <div className="font-medium text-gray-900 capitalize">{ing.name}</div>
-                    <div className={cn("text-xs", ing.isAvailable ? "text-emerald-600" : "text-red-500")}>
+                    <div className={cn("text-xs", ing.isAvailable ? "text-indigo-600" : "text-red-500")}>
                       {ing.isAvailable ? "Available" : "Unavailable"}
                     </div>
                   </td>
@@ -296,7 +322,7 @@ export default function InventoryPage() {
                       <button
                         onClick={() => handleUpdateStock(ing._id)}
                         disabled={updating === ing._id}
-                        className="rounded bg-teal-100 px-2 py-1 text-xs text-teal-700 hover:bg-teal-200 disabled:opacity-50"
+                        className="rounded bg-violet-100 px-2 py-1 text-xs text-violet-700 hover:bg-violet-200 disabled:opacity-50"
                       >
                         {updating === ing._id ? "…" : "Set"}
                       </button>
@@ -325,7 +351,7 @@ export default function InventoryPage() {
             })}
           </tbody>
         </table>
-      </div>
+      </motion.div>
     </div>
   )
 }

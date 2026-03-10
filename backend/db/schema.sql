@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS patients (
   nutrition_targets      TEXT,
   admission_date         TEXT,
   discharge_date         TEXT,
+  phone                  TEXT,
   patient_type           TEXT NOT NULL DEFAULT 'inpatient',
   is_active              INTEGER NOT NULL DEFAULT 1,
   doctor_id              TEXT,

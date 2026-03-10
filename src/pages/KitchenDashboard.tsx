@@ -9,6 +9,7 @@ import {
   ChefHat, Users, RefreshCw, AlertTriangle, Package, Utensils,
   MessageSquare, Check, Eye,
 } from "lucide-react"
+import { motion } from "framer-motion"
 
 interface ProductionGroup {
   groupCode: string
@@ -27,16 +28,16 @@ function GroupCard({ group }: { group: ProductionGroup }) {
   const [expanded, setExpanded] = useState(false)
 
   const DIET_COLORS: Record<string, string> = {
-    diabetic: "border-orange-200 bg-orange-50",
-    renal: "border-blue-200 bg-blue-50",
-    cardiac: "border-red-200 bg-red-50",
-    liquid: "border-cyan-200 bg-cyan-50",
-    soft: "border-teal-200 bg-teal-50",
-    regular: "border-gray-200 bg-gray-50",
+    diabetic: "border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50",
+    renal: "border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50",
+    cardiac: "border-red-200 bg-gradient-to-br from-red-50 to-rose-50",
+    liquid: "border-cyan-200 bg-gradient-to-br from-cyan-50 to-sky-50",
+    soft: "border-purple-200 bg-gradient-to-br from-purple-50 to-violet-50",
+    regular: "border-gray-200 bg-gradient-to-br from-gray-50 to-white",
   }
 
   return (
-    <Card className={cn("border", DIET_COLORS[group.dietType] ?? "border-gray-200 bg-white")}>
+    <Card className={cn("border hover:shadow-lg transition-all duration-300 card-hover", DIET_COLORS[group.dietType] ?? "border-gray-200 bg-white")}>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div>
@@ -123,15 +124,15 @@ function InventoryTable({ items }: { items: Ingredient[] }) {
     <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
+          <tr className="border-b border-gray-200 bg-gray-50/80">
             {["Ingredient", "Category", "Cal/100g", "Stock", "Reorder", "Status"].map((h) => (
-              <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500">{h}</th>
+              <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
             ))}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-100">
           {items.map((ing) => (
-            <tr key={ing._id} className="border-b border-gray-100 hover:bg-gray-50">
+            <tr key={ing._id} className="hover:bg-gray-50/70 transition-colors">
               <td className="px-4 py-3 font-medium text-gray-900 capitalize">{ing.name}</td>
               <td className="px-4 py-3 text-gray-500 capitalize">{ing.category}</td>
               <td className="px-4 py-3 text-gray-700">{ing.caloriesPer100}</td>
@@ -213,7 +214,7 @@ function MealPlanList() {
                 className={cn(
                   "px-3 py-1.5 text-xs font-medium rounded-lg transition whitespace-nowrap",
                   selectedDay === i
-                    ? "bg-teal-600 text-white"
+                    ? "bg-violet-600 text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 )}
               >
@@ -340,7 +341,7 @@ function SuggestionPanel() {
               </p>
 
               {s.response && (
-                <p className="text-sm text-teal-700 bg-teal-50 rounded-lg p-3 border border-teal-100">
+                <p className="text-sm text-violet-700 bg-violet-50 rounded-lg p-3 border border-violet-100">
                   <strong>Response:</strong> {s.response}
                 </p>
               )}
@@ -358,7 +359,7 @@ function SuggestionPanel() {
                       />
                       <div className="flex gap-2">
                         <Button size="sm" onClick={() => handleRespond(s._id, "responded")}
-                          className="bg-teal-600 hover:bg-teal-700 gap-1 text-xs">
+                          className="bg-violet-600 hover:bg-violet-700 gap-1 text-xs">
                           <Check size={12} /> Send Response
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => { setResponding(null); setResponseText("") }}
@@ -374,7 +375,7 @@ function SuggestionPanel() {
                         <Eye size={12} /> Acknowledge
                       </Button>
                       <Button size="sm" onClick={() => setResponding(s._id)}
-                        className="bg-teal-600 hover:bg-teal-700 gap-1 text-xs">
+                        className="bg-violet-600 hover:bg-violet-700 gap-1 text-xs">
                         <MessageSquare size={12} /> Respond
                       </Button>
                     </>
@@ -437,75 +438,95 @@ export default function KitchenDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
+      >
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Kitchen Dashboard</h1>
           <p className="text-sm text-gray-500">Production planning, inventory, meal plans & patient suggestions</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}
-            className="border-gray-200 text-gray-600 gap-1.5">
+            className="border-gray-200 text-gray-600 gap-1.5 hover:scale-105 active:scale-95 transition-transform">
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             Refresh
           </Button>
           <Button size="sm" onClick={handleRegroup} disabled={regrouping}
-            className="bg-teal-600 hover:bg-teal-700 gap-1.5">
+            className="bg-violet-600 hover:bg-violet-700 gap-1.5 hover:scale-105 active:scale-95 transition-transform">
             <ChefHat size={14} />
             {regrouping ? "Grouping…" : "Re-run Grouping"}
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Diet Groups", value: groups.length, icon: Utensils, color: "bg-teal-600" },
+          { label: "Diet Groups", value: groups.length, icon: Utensils, color: "bg-violet-600" },
           { label: "Ingredients", value: ingredients.length, icon: Package, color: "bg-blue-500" },
-          { label: "Low Stock", value: lowStock.length, icon: AlertTriangle, color: lowStock.length > 0 ? "bg-red-500" : "bg-emerald-500" },
+          { label: "Low Stock", value: lowStock.length, icon: AlertTriangle, color: lowStock.length > 0 ? "bg-red-500" : "bg-indigo-500" },
           { label: "New Suggestions", value: newCount, icon: MessageSquare, color: newCount > 0 ? "bg-orange-500" : "bg-gray-400" },
-        ].map((s) => (
-          <Card key={s.label} className="border-gray-200 bg-white shadow-sm">
+        ].map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.08, duration: 0.4 }}
+          >
+          <Card className="border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg transition-all duration-300 group card-hover">
             <CardContent className="flex items-center gap-3 p-4">
-              <div className={cn("flex size-10 items-center justify-center rounded-xl", s.color)}>
-                <s.icon size={18} className="text-white" />
+              <div className={cn("flex size-11 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3", s.color)}>
+                <s.icon size={19} className="text-white" />
               </div>
               <div>
-                <p className="text-xs text-gray-500">{s.label}</p>
-                <p className="text-xl font-bold text-gray-900">{s.value}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{s.label}</p>
+                <p className="text-2xl font-extrabold text-gray-900">{s.value}</p>
               </div>
             </CardContent>
           </Card>
+          </motion.div>
         ))}
       </div>
 
       {/* Low stock alert */}
       {lowStock.length > 0 && (
-        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.45 }}
+          className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4"
+        >
           <AlertTriangle size={18} className="text-red-500 shrink-0" />
           <div className="text-sm text-red-700">
             <strong>Low stock alert:</strong>{" "}
             {lowStock.map((i) => i.name).join(", ")} — please reorder.
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200 pb-0 overflow-x-auto">
+      <div className="flex gap-1 border-b border-gray-200 pb-0 overflow-x-auto">
         {([
-          { key: "production", label: "Production Plan", icon: "🍳" },
-          { key: "inventory", label: "Inventory", icon: "📦" },
-          { key: "mealplans", label: "Patient Meal Plans", icon: "🍽️" },
-          { key: "suggestions", label: `Suggestions${newCount > 0 ? ` (${newCount})` : ""}`, icon: "💬" },
+          { key: "production", label: "Production Plan", icon: ChefHat },
+          { key: "inventory", label: "Inventory", icon: Package },
+          { key: "mealplans", label: "Patient Meal Plans", icon: Utensils },
+          { key: "suggestions", label: `Suggestions${newCount > 0 ? ` (${newCount})` : ""}`, icon: MessageSquare },
         ] as const).map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={cn(
-              "px-4 py-2 text-sm font-medium border-b-2 transition whitespace-nowrap",
-              tab === t.key ? "border-teal-500 text-teal-700" : "border-transparent text-gray-400 hover:text-gray-700"
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition whitespace-nowrap",
+              tab === t.key
+                ? "border-violet-500 text-violet-700 bg-violet-50/50"
+                : "border-transparent text-gray-400 hover:text-gray-700 hover:bg-gray-50"
             )}
           >
-            {t.icon} {t.label}
+            <t.icon size={15} />
+            {t.label}
           </button>
         ))}
       </div>
@@ -513,13 +534,25 @@ export default function KitchenDashboard() {
       {tab === "production" && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {loading ? (
-            <div className="col-span-3 py-12 text-center text-gray-400">Loading production plan…</div>
+            <div className="col-span-3 flex items-center justify-center gap-3 py-12">
+              <svg className="animate-spin size-5 text-violet-500" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              <span className="text-gray-400">Loading production plan…</span>
+            </div>
           ) : groups.length === 0 ? (
-            <div className="col-span-3 rounded-xl border border-gray-200 bg-white p-12 text-center text-gray-400">
+            <div className="col-span-3 rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm p-12 text-center text-gray-400">
               No diet groups yet. Click "Re-run Grouping" to auto-group patients.
             </div>
           ) : (
-            groups.map((g) => <GroupCard key={g.groupCode} group={g} />)
+            groups.map((g, i) => (
+              <motion.div
+                key={g.groupCode}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 + i * 0.05, duration: 0.35 }}
+              >
+                <GroupCard group={g} />
+              </motion.div>
+            ))
           )}
         </div>
       )}
