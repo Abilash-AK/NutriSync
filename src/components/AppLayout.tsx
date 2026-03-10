@@ -212,31 +212,29 @@ export default function AppLayout() {
         </header>
 
         {/* Toast alerts */}
-        <AnimatePresence>
-          {alerts.length > 0 && (
-            <div className="absolute right-4 top-20 z-50 flex flex-col gap-2">
-              {alerts.map((a, i) => (
-                <motion.div
-                  key={a.id}
-                  initial={{ opacity: 0, x: 80, scale: 0.9 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 80, scale: 0.9 }}
-                  transition={{ duration: 0.35, delay: i * 0.05 }}
-                  onClick={() => dismiss(a.id)}
-                  className={cn(
-                    "cursor-pointer rounded-xl px-4 py-3 text-sm font-medium shadow-lg border",
-                    a.type === "error"   && "bg-red-50 border-red-200 text-red-700",
-                    a.type === "success" && "bg-emerald-50 border-emerald-200 text-emerald-700",
-                    a.type === "warning" && "bg-amber-50 border-amber-200 text-amber-700",
-                    a.type === "info"    && "bg-violet-50 border-violet-200 text-violet-700"
-                  )}
-                >
-                  {a.message}
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </AnimatePresence>
+        <div className="absolute right-4 top-20 z-50 flex flex-col gap-2 pointer-events-none">
+          <AnimatePresence>
+            {alerts.map((a) => (
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0, x: 80, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 80, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+                onClick={() => dismiss(a.id)}
+                className={cn(
+                  "cursor-pointer rounded-xl px-4 py-3 text-sm font-medium shadow-lg border pointer-events-auto",
+                  a.type === "error"   && "bg-red-50 border-red-200 text-red-700",
+                  a.type === "success" && "bg-emerald-50 border-emerald-200 text-emerald-700",
+                  a.type === "warning" && "bg-amber-50 border-amber-200 text-amber-700",
+                  a.type === "info"    && "bg-violet-50 border-violet-200 text-violet-700"
+                )}
+              >
+                {a.message}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <motion.div
